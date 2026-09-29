@@ -6,6 +6,7 @@ import { Linking, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BookCover, LikedHeart, Stars, formatRating } from "@/components/book";
+import { DiscussionsSection } from "@/components/discussions";
 import { EntrySheet } from "@/components/entry-sheet";
 import { ReadingSection } from "@/components/reading";
 import { ReviewCard } from "@/components/review-card";
@@ -57,6 +58,8 @@ export default function BookScreen() {
         {book.synopsis ? <Synopsis text={book.synopsis} /> : null}
 
         {status === "user" ? <ReadingSection book={book} /> : null}
+
+        <DiscussionsSection book={{ id: book.id, title: book.title }} />
 
         {book.genres.length ? (
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>

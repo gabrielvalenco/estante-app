@@ -65,6 +65,8 @@ function message(n: NotificationItem) {
       return `curtiu sua review de ${n.bookTitle ?? "um livro"}.`;
     case "friend_finished":
       return `terminou de ler ${n.bookTitle ?? "um livro"}.`;
+    case "discussion_reply":
+      return `respondeu sua discussão sobre ${n.bookTitle ?? "um livro"}.`;
   }
 }
 

@@ -110,7 +110,7 @@ export type FeedItem = ShelfEntry & { user: UserRef };
 
 export type NotificationItem = {
   id: string;
-  type: "follow" | "follow_request" | "follow_accepted" | "review_like" | "friend_finished";
+  type: "follow" | "follow_request" | "follow_accepted" | "review_like" | "friend_finished" | "discussion_reply";
   actor: ProfileCard;
   bookId: string | null;
   bookTitle: string | null;
@@ -145,3 +145,28 @@ export type Usage = {
 };
 
 export type ReadingData = { progress: Progress | null; annotations: Annotation[]; usage: Usage };
+
+export type Author = { handle: string; name: string; tone: string; avatarUrl: string | null; founder: boolean };
+
+/** Discussão. spoiler = fala de uma página que a pessoa ainda não leu (title e body vêm null). */
+export type Thread = {
+  id: string;
+  bookId: string;
+  page: number;
+  spoiler: boolean;
+  title: string | null;
+  body: string | null;
+  author: Author;
+  replyCount: number;
+  mine: boolean;
+  hidden: boolean;
+  createdAt: number;
+  lastActivityAt: number;
+};
+
+export type Post = { id: string; page: number; spoiler: boolean; body: string | null; author: Author; mine: boolean; hidden: boolean; createdAt: number };
+
+/** page: até onde a pessoa vê (null = tudo). bookmark: a página do marcador, usada como padrão ao escrever. */
+export type Viewer = { loggedIn: boolean; page: number | null; finished: boolean; revealed: boolean; bookmark: number };
+
+export type ThreadUsage = { planName: string; threadsThisMonth: number; threadsPerMonthLimit: number | null };
