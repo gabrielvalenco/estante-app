@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button, Loading, Text } from "@/components/ui";
 import { Avatar } from "@/components/user";
+import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { ago, discussionError, pageLabel, useCreateThread, useThreads } from "@/lib/discussions";
 import { font, useColors } from "@/lib/theme";
@@ -202,6 +203,7 @@ function NewThreadSheet({
   const [body, setBody] = useState("");
   const [page, setPage] = useState(String(defaultPage));
   const [error, setError] = useState<string | null>(null);
+  const [upsell, setUpsell] = useState(false);
 
   function submit() {
     if (title.trim().length < 3) return setError("Dê um título com pelo menos 3 letras.");
@@ -214,7 +216,10 @@ function NewThreadSheet({
           void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
           onClose();
         },
-        onError: (err) => setError(discussionError(err)),
+        onError: (err) => {
+          setUpsell(err instanceof ApiError && err.status === 402);
+          setError(discussionError(err));
+        },
       },
     );
   }
@@ -257,6 +262,17 @@ function NewThreadSheet({
             Discussões são públicas, mesmo com o perfil privado.
             {usage?.threadsPerMonthLimit != null ? ` ${usage.threadsThisMonth} de ${usage.threadsPerMonthLimit} discussões novas neste mês no plano ${usage.planName}.` : ""}
           </Text>
+          {upsell ? (
+            <Button
+              variant="secondary"
+              onPress={() => {
+                onClose();
+                router.push("/planos");
+              }}
+            >
+              Ver planos
+            </Button>
+          ) : null}
           <Button onPress={submit} loading={create.isPending}>
             Publicar
           </Button>

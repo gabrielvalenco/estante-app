@@ -280,6 +280,7 @@ export function AnnotationSheet({
   const [comment, setComment] = useState(annotation?.comment ?? "");
   const [page, setPage] = useState(String(annotation?.page ?? defaultPage ?? ""));
   const [error, setError] = useState<string | null>(null);
+  const [upsell, setUpsell] = useState(false);
   const max = kind === "quote" ? 1000 : 4000;
 
   function submit() {
@@ -292,7 +293,11 @@ export function AnnotationSheet({
           void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
           onClose();
         },
-        onError: (err) => setError(limitMessage(err) ?? errorMessage(err)),
+        onError: (err) => {
+          const limit = limitMessage(err);
+          setUpsell(Boolean(limit));
+          setError(limit ?? errorMessage(err));
+        },
       },
     );
   }
@@ -359,6 +364,17 @@ export function AnnotationSheet({
             <Text variant="small" tone="danger">
               {error}
             </Text>
+          ) : null}
+          {upsell ? (
+            <Button
+              variant="secondary"
+              onPress={() => {
+                onClose();
+                router.push("/planos");
+              }}
+            >
+              Ver planos
+            </Button>
           ) : null}
           <Text variant="caption" tone="ink4">
             Só você vê suas anotações.

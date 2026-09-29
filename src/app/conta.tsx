@@ -241,7 +241,7 @@ function Field({ label, children, style }: { label: string; children: React.Reac
   );
 }
 
-/** Plano atual. Assinar e gerenciar abre a página de Planos do site (pagamento pelo Stripe). */
+/** Plano atual; toque para ver os planos. */
 function PlanRow() {
   const c = useColors();
   const { account } = useAuth();
@@ -250,9 +250,9 @@ function PlanRow() {
   const end = plan?.periodEnd ? new Date(plan.periodEnd).toLocaleDateString("pt-BR", { day: "numeric", month: "long" }) : null;
   return (
     <Pressable
-      onPress={() => void Linking.openURL(`${SITE_URL}/planos`)}
-      accessibilityRole="link"
-      accessibilityHint="Abre a página de planos no navegador"
+      onPress={() => router.push("/planos")}
+      accessibilityRole="button"
+      accessibilityHint="Abre os planos"
       style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 16, backgroundColor: paid ? c.musgoSoft : c.anilSoft, opacity: pressed ? 0.8 : 1 })}
     >
       <View style={{ flex: 1, gap: 2 }}>
