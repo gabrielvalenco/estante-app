@@ -66,8 +66,8 @@ export function useDeleteAnnotation() {
 export function limitMessage(err: unknown): string | null {
   if (!(err instanceof ApiError) || err.status !== 402) return null;
   return err.code === "limit_notes"
-    ? "Você chegou ao limite de notas deste livro no plano Brochura. O Capa Dura, que chega em breve, libera notas ilimitadas."
-    : "Você chegou ao limite de 20 citações do plano Brochura. O Capa Dura, que chega em breve, libera citações ilimitadas.";
+    ? "Você chegou ao limite de notas deste livro no plano Brochura. No Capa Dura as notas são ilimitadas: veja em Configurações, Plano."
+    : "Você chegou ao limite de 20 citações do plano Brochura. No Capa Dura as citações são ilimitadas: veja em Configurações, Plano.";
 }
 
 export function percent(p: Progress | null | undefined) {

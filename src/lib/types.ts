@@ -53,6 +53,8 @@ export type Account = {
   requested: string[];
   blocked: string[];
   hasPassword: boolean;
+  /** Plano: brochura (grátis) ou capa-dura. Assinar e gerenciar é pelo site. */
+  plan?: { plan: "brochura" | "capa-dura" | "ex-libris"; status: string | null; interval: "month" | "year" | null; periodEnd: number | null; canceling: boolean };
 };
 
 export type Review = {

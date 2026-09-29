@@ -59,7 +59,7 @@ export function report(kind: "thread" | "post", id: string) {
 
 export function discussionError(err: unknown): string {
   if (err instanceof ApiError) {
-    if (err.status === 402) return "O plano Brochura abre até 3 discussões por mês. Responder continua livre, e o Capa Dura, que chega em breve, libera discussões ilimitadas.";
+    if (err.status === 402) return "O plano Brochura abre até 3 discussões por mês. Responder continua livre, e no Capa Dura as discussões são ilimitadas: veja em Configurações, Plano.";
     if (err.status === 429) return "Muitas mensagens seguidas. Espere um pouco e tente de novo.";
     if (err.code === "blocked") return "Você não pode participar desta discussão.";
     if (err.code === "invalid") return "Confira os campos: o título precisa de pelo menos 3 letras.";

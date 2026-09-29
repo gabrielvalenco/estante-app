@@ -187,6 +187,8 @@ function Form({ profile }: { profile: Profile }) {
           Salvar alterações
         </Button>
 
+        <PlanRow />
+
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 16, backgroundColor: c.surface, borderWidth: 1, borderColor: c.line }}>
           <View style={{ flex: 1, gap: 2 }}>
             <Text variant="label">Perfil privado</Text>
@@ -236,5 +238,32 @@ function Field({ label, children, style }: { label: string; children: React.Reac
       </Text>
       {children}
     </View>
+  );
+}
+
+/** Plano atual. Assinar e gerenciar abre a página de Planos do site (pagamento pelo Stripe). */
+function PlanRow() {
+  const c = useColors();
+  const { account } = useAuth();
+  const plan = account?.plan;
+  const paid = plan && plan.plan !== "brochura";
+  const end = plan?.periodEnd ? new Date(plan.periodEnd).toLocaleDateString("pt-BR", { day: "numeric", month: "long" }) : null;
+  return (
+    <Pressable
+      onPress={() => void Linking.openURL(`${SITE_URL}/planos`)}
+      accessibilityRole="link"
+      accessibilityHint="Abre a página de planos no navegador"
+      style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 16, backgroundColor: paid ? c.musgoSoft : c.anilSoft, opacity: pressed ? 0.8 : 1 })}
+    >
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text variant="label">{paid ? "Capa Dura" : "Plano Brochura (grátis)"}</Text>
+        <Text variant="small" tone="ink3">
+          {paid ? (plan.canceling ? `Cancelado: vale até ${end}.` : end ? `Renova em ${end}.` : "Assinatura ativa.") : "Citações, notas e discussões sem limite no Capa Dura."}
+        </Text>
+      </View>
+      <Text variant="small" weight="semibold" style={{ color: paid ? c.musgo : c.anil }}>
+        {paid ? "Gerenciar" : "Ver planos"}
+      </Text>
+    </Pressable>
   );
 }
