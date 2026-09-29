@@ -118,3 +118,30 @@ export type NotificationItem = {
   read: boolean;
   pending: boolean;
 };
+
+export type AnnotationKind = "quote" | "note";
+
+export type Annotation = {
+  id: string;
+  kind: AnnotationKind;
+  text: string;
+  comment: string;
+  page: number | null;
+  book: { id: string; title: string; author: string; coverId: number | null; color: string };
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type Progress = { page: number; totalPages: number | null; updatedAt: number };
+
+/** Uso do plano. Limite null = sem limite. */
+export type Usage = {
+  plan: "brochura" | "capa-dura" | "ex-libris";
+  planName: string;
+  quotes: number;
+  quotesLimit: number | null;
+  notesInBook: number;
+  notesPerBookLimit: number | null;
+};
+
+export type ReadingData = { progress: Progress | null; annotations: Annotation[]; usage: Usage };

@@ -62,6 +62,7 @@ function Navigation({ ready }: { ready: boolean }) {
         <Stack.Screen name="entrar" options={{ presentation: "modal", title: "Entrar" }} />
         <Stack.Screen name="conta" options={{ title: "Configurações" }} />
         <Stack.Screen name="notificacoes" options={{ title: "Notificações" }} />
+        <Stack.Screen name="anotacoes" options={{ title: "Anotações" }} />
       </Stack>
     </ThemeProvider>
   );

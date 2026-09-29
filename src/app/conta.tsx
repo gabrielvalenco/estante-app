@@ -9,6 +9,7 @@ import { Button, Text } from "@/components/ui";
 import { Avatar } from "@/components/user";
 import { SITE_URL, api, errorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { confirmAction } from "@/lib/confirm";
 import { font, toneColors, useColors } from "@/lib/theme";
 import type { Account, Profile } from "@/lib/types";
 
@@ -207,17 +208,15 @@ function Form({ profile }: { profile: Profile }) {
         <Button
           variant="ghost"
           onPress={() =>
-            Alert.alert("Sair da conta?", "Sua estante continua salva na conta.", [
-              { text: "Cancelar", style: "cancel" },
-              {
-                text: "Sair",
-                style: "destructive",
-                onPress: () => {
-                  void signOut();
-                  router.replace("/");
-                },
+            confirmAction(
+              "Sair da conta?",
+              "Sair",
+              () => {
+                void signOut();
+                router.replace("/");
               },
-            ])
+              "Sua estante continua salva na conta.",
+            )
           }
         >
           <Text tone="danger" weight="medium">

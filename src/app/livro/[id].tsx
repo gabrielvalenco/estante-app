@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BookCover, LikedHeart, Stars, formatRating } from "@/components/book";
 import { EntrySheet } from "@/components/entry-sheet";
+import { ReadingSection } from "@/components/reading";
 import { ReviewCard } from "@/components/review-card";
 import { Button, Empty, Loading, Text } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -20,6 +21,7 @@ export default function BookScreen() {
   const c = useColors();
   const insets = useSafeAreaInsets();
   const q = useQuery({ queryKey: ["book", id], queryFn: () => api<BookPage>(`/books/${id}`) });
+  const { status } = useAuth();
 
   if (q.isPending) return <Loading />;
   if (q.isError || !q.data) return <Empty title="Livro não encontrado">Tente de novo em instantes.</Empty>;
@@ -53,6 +55,8 @@ export default function BookScreen() {
         </View>
 
         {book.synopsis ? <Synopsis text={book.synopsis} /> : null}
+
+        {status === "user" ? <ReadingSection book={book} /> : null}
 
         {book.genres.length ? (
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
