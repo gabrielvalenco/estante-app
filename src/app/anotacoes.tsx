@@ -1,11 +1,12 @@
 import { router } from "expo-router";
-import { Search } from "lucide-react-native";
+import { Search, Share2 } from "lucide-react-native";
 import { useState } from "react";
-import { FlatList, Pressable, RefreshControl, TextInput, View } from "react-native";
+import { Alert, FlatList, Pressable, RefreshControl, Share, TextInput, View } from "react-native";
 
 import { BookCover } from "@/components/book";
 import { AnnotationRow, AnnotationSheet } from "@/components/reading";
 import { Chip, Empty, Loading, Text } from "@/components/ui";
+import { ApiError, siteText } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { confirmAction } from "@/lib/confirm";
 import { percent, useAllAnnotations, useDeleteAnnotation } from "@/lib/reading";
@@ -46,7 +47,12 @@ export default function Annotations() {
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
         ListHeaderComponent={
           <View style={{ gap: 16, marginBottom: 8 }}>
-            <Text tone="ink3">Seus marcadores, citações e notas. Só você vê.</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <Text tone="ink3" style={{ flex: 1 }}>
+                Seus marcadores, citações e notas. Só você vê.
+              </Text>
+              {annotations.length ? <ExportButton /> : null}
+            </View>
             {reading.length ? (
               <View style={{ gap: 8 }}>
                 <Text variant="caption" tone="ink3">
@@ -122,5 +128,43 @@ export default function Annotations() {
       />
       {editing ? <AnnotationSheet book={editing.book} kind={editing.kind} annotation={editing} defaultPage={null} onClose={() => setEditing(null)} /> : null}
     </>
+  );
+}
+
+/** Exporta citações e notas em Markdown pela folha de compartilhar do celular (Notion, e-mail, arquivos). Capa Dura. */
+function ExportButton() {
+  const c = useColors();
+  const [busy, setBusy] = useState(false);
+  async function run() {
+    setBusy(true);
+    try {
+      const markdown = await siteText("/api/conta/anotacoes");
+      await Share.share({ message: markdown, title: "Minhas anotações da Estante" });
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 402) {
+        confirmAction(
+          "Exportar faz parte do Capa Dura",
+          "Ver planos",
+          () => router.push("/planos"),
+          "Suas citações e notas saem em Markdown, prontas para o Notion ou o Obsidian. Seus dados completos continuam grátis para baixar no site (LGPD).",
+        );
+      } else Alert.alert("Não foi possível exportar agora");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Pressable
+      onPress={run}
+      disabled={busy}
+      accessibilityRole="button"
+      accessibilityLabel="Exportar anotações"
+      style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: c.sunken, opacity: pressed || busy ? 0.6 : 1 })}
+    >
+      <Share2 size={15} color={c.ink2} />
+      <Text variant="small" weight="medium">
+        {busy ? "Exportando..." : "Exportar"}
+      </Text>
+    </Pressable>
   );
 }

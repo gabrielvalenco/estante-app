@@ -64,3 +64,18 @@ export function errorMessage(err: unknown): string {
   };
   return messages[code] ?? "Algo deu errado. Tente de novo em instantes.";
 }
+
+/** Texto puro de uma rota do site (fora de /api/v1), com o token. Usado pela exportação em Markdown. */
+export async function siteText(path: string): Promise<string> {
+  let res: Response;
+  try {
+    res = await fetch(SITE_URL + path, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  } catch {
+    throw new ApiError("offline", 0);
+  }
+  if (!res.ok) {
+    const data = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new ApiError(data?.error ?? "unavailable", res.status);
+  }
+  return res.text();
+}
