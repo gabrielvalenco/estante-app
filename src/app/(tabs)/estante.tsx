@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { NotebookPen } from "lucide-react-native";
+import { ChartColumnBig, NotebookPen } from "lucide-react-native";
 import { useState } from "react";
 import { FlatList, Pressable, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -59,18 +59,29 @@ export default function ShelfScreen() {
           <View style={{ gap: 16, paddingTop: 16, paddingBottom: 4 }}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
               <Text variant="title">Minha estante</Text>
-              <Pressable
-                onPress={() => router.push("/anotacoes")}
-                accessibilityRole="button"
-                accessibilityLabel="Anotações"
-                hitSlop={8}
-                style={{ flexDirection: "row", alignItems: "center", gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: c.sunken }}
-              >
-                <NotebookPen size={16} color={c.ameixa} />
-                <Text variant="small" weight="medium">
-                  Anotações
-                </Text>
-              </Pressable>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <Pressable
+                  onPress={() => router.push("/retrospectiva")}
+                  accessibilityRole="button"
+                  accessibilityLabel="Retrospectiva"
+                  hitSlop={8}
+                  style={{ width: 36, height: 36, alignItems: "center", justifyContent: "center", borderRadius: 999, backgroundColor: c.sunken }}
+                >
+                  <ChartColumnBig size={16} color={c.anil} />
+                </Pressable>
+                <Pressable
+                  onPress={() => router.push("/anotacoes")}
+                  accessibilityRole="button"
+                  accessibilityLabel="Anotações"
+                  hitSlop={8}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: c.sunken }}
+                >
+                  <NotebookPen size={16} color={c.ameixa} />
+                  <Text variant="small" weight="medium">
+                    Anotações
+                  </Text>
+                </Pressable>
+              </View>
             </View>
             <Goal read={readThisYear} goal={goal} year={year} />
             <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>

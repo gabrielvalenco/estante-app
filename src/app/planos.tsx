@@ -19,9 +19,10 @@ const BROCHURA = [
   "20 citações e 3 notas por livro",
   "3 discussões novas por mês (responder é livre)",
   "Importar a estante do Goodreads",
+  "Retrospectiva do ano (básica)",
 ];
-const CAPA_DURA = ["Tudo do Brochura", "Citações ilimitadas", "Notas ilimitadas em cada livro", "Discussões novas sem limite", "Importar destaques do Kindle", "Exportar citações e notas (Markdown)"];
-const CAPA_DURA_SOON = ["Retrospectiva do ano"];
+const CAPA_DURA = ["Tudo do Brochura", "Citações ilimitadas", "Notas ilimitadas em cada livro", "Discussões novas sem limite", "Importar destaques do Kindle", "Exportar citações e notas (Markdown)", "Retrospectiva do ano completa"];
+const CAPA_DURA_SOON: string[] = [];
 const EX_LIBRIS = ["Tudo do Capa Dura", "Clubes de leitura privados", "Citação por foto da página, sem limite", "Temas e selo Ex Libris"];
 
 /**
@@ -97,10 +98,14 @@ export default function Plans() {
           {period === "year" ? "Equivale a R$ 4,92 por mês." : "Ou R$ 59 no plano anual."}
         </Text>
         <Features items={CAPA_DURA} />
-        <Text variant="caption" tone="ink4" style={{ marginTop: 12 }}>
-          EM BREVE NO CAPA DURA
-        </Text>
-        <Features items={CAPA_DURA_SOON} soft />
+        {CAPA_DURA_SOON.length ? (
+          <>
+            <Text variant="caption" tone="ink4" style={{ marginTop: 12 }}>
+              EM BREVE NO CAPA DURA
+            </Text>
+            <Features items={CAPA_DURA_SOON} soft />
+          </>
+        ) : null}
         <View style={{ marginTop: 16 }}>
           {paid ? (
             <Button onPress={openSite}>Gerenciar no site</Button>

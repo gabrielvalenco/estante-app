@@ -65,6 +65,7 @@ function Navigation({ ready }: { ready: boolean }) {
         <Stack.Screen name="anotacoes" options={{ title: "Anotações" }} />
         <Stack.Screen name="discussao/[id]" options={{ title: "Discussão" }} />
         <Stack.Screen name="planos" options={{ title: "Planos" }} />
+        <Stack.Screen name="retrospectiva" options={{ title: "Retrospectiva" }} />
       </Stack>
     </ThemeProvider>
   );
