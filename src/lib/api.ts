@@ -79,3 +79,14 @@ export async function siteText(path: string): Promise<string> {
   }
   return res.text();
 }
+
+/** JSON de uma rota do site (fora de /api/v1), com o token. Devolve o status junto: o chamador decide o que é erro. */
+export async function siteJson<T>(path: string, init: { method?: string; form?: FormData } = {}): Promise<{ status: number; data: T }> {
+  let res: Response;
+  try {
+    res = await fetch(SITE_URL + path, { method: init.method ?? "GET", body: init.form, headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  } catch {
+    throw new ApiError("offline", 0);
+  }
+  return { status: res.status, data: (await res.json().catch(() => ({}))) as T };
+}

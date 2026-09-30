@@ -1,12 +1,14 @@
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { BookMarked, Minus, NotebookPen, Pencil, Plus, Quote, Share2, Trash2, X } from "lucide-react-native";
-import { useState } from "react";
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Share, TextInput, View } from "react-native";
+import { BookMarked, Camera, ImageIcon, Minus, NotebookPen, Pencil, Plus, Quote, Share2, Trash2, X } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Share, TextInput, View } from "react-native";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
+import * as ImagePicker from "expo-image-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button, Chip, Loading, Text } from "@/components/ui";
-import { errorMessage } from "@/lib/api";
+import { errorMessage, siteJson } from "@/lib/api";
 import { confirmAction } from "@/lib/confirm";
 import { limitMessage, percent, useDeleteAnnotation, useReading, useSaveAnnotation, useSaveProgress } from "@/lib/reading";
 import { EMPTY_ENTRY, todayISO, useMyEntry, useSaveEntry } from "@/lib/shelf";
@@ -321,6 +323,18 @@ export function AnnotationSheet({
           </Pressable>
         </View>
         <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: insets.bottom + 24 }} keyboardShouldPersistTaps="handled">
+          {kind === "quote" && !annotation ? (
+            <PhotoReader
+              onRead={(r) => {
+                setText(r.text.slice(0, max));
+                if (r.page) setPage(String(r.page));
+              }}
+              onUpsell={() => {
+                onClose();
+                router.push("/planos");
+              }}
+            />
+          ) : null}
           <View style={{ gap: 6 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
               <Text variant="small" tone="ink3" weight="medium">
@@ -385,5 +399,111 @@ export function AnnotationSheet({
         </ScrollView>
       </KeyboardAvoidingView>
     </Modal>
+  );
+}
+
+type PhotoUsage = { enabled: boolean; used: number; limit: number | null };
+type PhotoResult = { text?: string; page?: number | null; error?: string; used?: number; limit?: number | null };
+
+/**
+ * Citação por foto (Capa Dura): fotografa ou escolhe a foto da página, reduz no celular
+ * e manda para o site ler. O texto volta para a pessoa revisar; a foto não fica guardada.
+ */
+function PhotoReader({ onRead, onUpsell }: { onRead: (r: { text: string; page: number | null }) => void; onUpsell: () => void }) {
+  const c = useColors();
+  const [usage, setUsage] = useState<PhotoUsage | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<{ error: boolean; text: string; upsell?: boolean } | null>(null);
+
+  useEffect(() => {
+    siteJson<PhotoUsage>("/api/leitura/foto").then((r) => r.status === 200 && setUsage(r.data), () => {});
+  }, []);
+
+  async function pick(source: "camera" | "library") {
+    if (usage?.limit === 0) return setMessage({ error: true, upsell: true, text: "Citação por foto é do plano Capa Dura." });
+    if (source === "camera") {
+      const perm = await ImagePicker.requestCameraPermissionsAsync();
+      if (!perm.granted) return setMessage({ error: true, text: "Sem acesso à câmera. Libere nas configurações do celular ou escolha da galeria." });
+    }
+    const options: ImagePicker.ImagePickerOptions = { mediaTypes: ["images"], quality: 1 };
+    const picked = source === "camera" ? await ImagePicker.launchCameraAsync(options) : await ImagePicker.launchImageLibraryAsync(options);
+    if (picked.canceled || !picked.assets[0]) return;
+    setBusy(true);
+    setMessage(null);
+    try {
+      const asset = picked.assets[0];
+      // Reduz para 1600px no lado maior: o texto segue legível e o envio fica leve.
+      const ctx = ImageManipulator.manipulate(asset.uri);
+      // Largura e altura explícitas: com height null o redimensionamento quebra na versão web.
+      const scale = Math.min(1, 1600 / Math.max(asset.width, asset.height));
+      if (scale < 1) ctx.resize({ width: Math.round(asset.width * scale), height: Math.round(asset.height * scale) });
+      const image = await ctx.renderAsync();
+      const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.85 });
+      const form = new FormData();
+      if (Platform.OS === "web") form.append("file", await (await fetch(saved.uri)).blob(), "pagina.jpg");
+      else form.append("file", { uri: saved.uri, name: "pagina.jpg", type: "image/jpeg" } as unknown as Blob);
+      const { status, data } = await siteJson<PhotoResult>("/api/leitura/foto", { method: "POST", form });
+      if (typeof data.used === "number") setUsage((u) => u && { ...u, used: data.used! });
+      if (status === 200 && data.text) {
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+        onRead({ text: data.text, page: data.page ?? null });
+        setMessage({ error: false, text: "Confira o texto antes de salvar: a leitura por foto pode errar uma palavra ou outra." });
+      } else if (status === 402) {
+        setMessage({ error: true, upsell: true, text: data.error === "limit" ? `Você usou as ${data.limit} leituras por foto deste mês.` : "Citação por foto é do plano Capa Dura." });
+      } else if (status === 422) {
+        setMessage({ error: true, text: data.error === "no_text" ? "Não encontramos texto de livro nessa foto." : "Não deu para ler com segurança. Tente com mais luz e a página reta." });
+      } else {
+        setMessage({ error: true, text: "Não foi possível ler a foto agora. Tente de novo em instantes." });
+      }
+    } catch (err) {
+      console.error("[foto da página]", err);
+      setMessage({ error: true, text: "Não foi possível enviar a foto. Confira a conexão e tente de novo." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!usage) return null;
+  const left = usage.limit === null ? null : Math.max(0, usage.limit - usage.used);
+  const disabled = !usage.enabled || busy;
+  return (
+    <View style={{ backgroundColor: c.sunken, borderRadius: 14, padding: 12, gap: 10 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <Text variant="small" weight="medium">
+          Ler de uma foto
+        </Text>
+        <Text variant="caption" tone="ink4">
+          {!usage.enabled ? "Em breve" : usage.limit === 0 ? "Capa Dura" : left === null ? "Sem limite" : `${left} de ${usage.limit} este mês`}
+        </Text>
+      </View>
+      {busy ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, height: 40 }}>
+          <ActivityIndicator color={c.anil} />
+          <Text variant="small" tone="ink3">
+            Lendo a página...
+          </Text>
+        </View>
+      ) : (
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <Button variant="secondary" disabled={disabled} onPress={() => void pick("camera")} icon={<Camera size={16} color={c.ink} />} style={{ flex: 1, height: 40, backgroundColor: c.surface }}>
+            Câmera
+          </Button>
+          <Button variant="secondary" disabled={disabled} onPress={() => void pick("library")} icon={<ImageIcon size={16} color={c.ink} />} style={{ flex: 1, height: 40, backgroundColor: c.surface }}>
+            Galeria
+          </Button>
+        </View>
+      )}
+      {message ? (
+        <Text variant="small" tone={message.error ? "danger" : "ink3"}>
+          {message.text}
+          {message.upsell ? (
+            <Text variant="small" tone="anil" weight="medium" onPress={onUpsell}>
+              {" "}
+              Ver planos
+            </Text>
+          ) : null}
+        </Text>
+      ) : null}
+    </View>
   );
 }

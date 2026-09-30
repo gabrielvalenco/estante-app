@@ -49,8 +49,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "A Estante usa suas fotos só para você escolher a foto do perfil.",
-          "cameraPermission": false,
+          "photosPermission": "A Estante usa suas fotos só para a foto do perfil e para ler a página de uma citação.",
+          "cameraPermission": "A Estante usa a câmera só quando você fotografa uma página para guardar a citação.",
           "microphonePermission": false
         }
       ]
