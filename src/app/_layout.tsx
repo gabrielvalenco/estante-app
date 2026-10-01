@@ -70,6 +70,8 @@ function Navigation({ ready }: { ready: boolean }) {
         <Stack.Screen name="planos" options={{ title: "Planos" }} />
         <Stack.Screen name="retrospectiva" options={{ title: "Retrospectiva" }} />
         <Stack.Screen name="conectado" options={{ title: "" }} />
+        <Stack.Screen name="ajuda/index" options={{ title: "Ajuda" }} />
+        <Stack.Screen name="ajuda/[number]" options={{ title: "Pedido" }} />
         <Stack.Screen name="clubes/index" options={{ title: "Clubes" }} />
         <Stack.Screen name="clubes/[id]" options={{ title: "Clube" }} />
         <Stack.Screen name="clubes/convite/[code]" options={{ title: "Convite" }} />

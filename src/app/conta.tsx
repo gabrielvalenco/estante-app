@@ -1,7 +1,7 @@
 import { SaveFormat, ImageManipulator } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { Camera, Check } from "lucide-react-native";
+import { Camera, Check, ChevronRight, LifeBuoy } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Switch, TextInput, View } from "react-native";
 
@@ -188,6 +188,20 @@ function Form({ profile }: { profile: Profile }) {
         </Button>
 
         <PlanRow />
+        <Pressable
+          onPress={() => router.push("/ajuda")}
+          accessibilityRole="button"
+          style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 16, backgroundColor: c.surface, borderWidth: 1, borderColor: c.line, opacity: pressed ? 0.8 : 1 })}
+        >
+          <LifeBuoy size={20} color={c.anil} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text variant="label">Ajuda e contato</Text>
+            <Text variant="small" tone="ink3">
+              Dúvidas frequentes e seus pedidos de suporte.
+            </Text>
+          </View>
+          <ChevronRight size={18} color={c.ink4} />
+        </Pressable>
 
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 16, backgroundColor: c.surface, borderWidth: 1, borderColor: c.line }}>
           <View style={{ flex: 1, gap: 2 }}>

@@ -112,7 +112,7 @@ export type FeedItem = ShelfEntry & { user: UserRef };
 
 export type NotificationItem = {
   id: string;
-  type: "follow" | "follow_request" | "follow_accepted" | "review_like" | "friend_finished" | "discussion_reply";
+  type: "follow" | "follow_request" | "follow_accepted" | "review_like" | "friend_finished" | "discussion_reply" | "support_reply";
   actor: ProfileCard;
   bookId: string | null;
   bookTitle: string | null;

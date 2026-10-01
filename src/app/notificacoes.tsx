@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { FlatList, Pressable, RefreshControl, View } from "react-native";
 
 import { Button, Empty, Loading, Text } from "@/components/ui";
+import { Mark } from "@/components/brand";
 import { Avatar } from "@/components/user";
 import { api } from "@/lib/api";
 import { useColors } from "@/lib/theme";
@@ -33,10 +34,20 @@ export default function Notifications() {
       ListEmptyComponent={<Empty title="Nenhuma notificação">Quando alguém seguir você ou curtir uma review, aparece aqui.</Empty>}
       renderItem={({ item }) => (
         <Pressable
-          onPress={() => router.push(item.bookId && item.type !== "follow" ? `/livro/${item.bookId}` : `/u/${item.actor.handle}`)}
+          onPress={() =>
+            item.type === "support_reply"
+              ? router.push(`/ajuda/${item.bookId?.split(":")[1] ?? ""}`)
+              : router.push(item.bookId && item.type !== "follow" ? `/livro/${item.bookId}` : `/u/${item.actor.handle}`)
+          }
           style={({ pressed }) => ({ flexDirection: "row", gap: 12, paddingVertical: 14, borderBottomWidth: 1, borderColor: c.line, opacity: pressed ? 0.7 : 1 })}
         >
-          <Avatar user={item.actor} size={40} />
+          {item.type === "support_reply" ? (
+            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.anilSoft, alignItems: "center", justifyContent: "center" }}>
+              <Mark size={22} />
+            </View>
+          ) : (
+            <Avatar user={item.actor} size={40} />
+          )}
           <View style={{ flex: 1, gap: 2 }}>
             <Text>
               <Text weight="semibold">{item.actor.name}</Text> {message(item)}
@@ -67,6 +78,8 @@ function message(n: NotificationItem) {
       return `terminou de ler ${n.bookTitle ?? "um livro"}.`;
     case "discussion_reply":
       return `respondeu sua discussão sobre ${n.bookTitle ?? "um livro"}.`;
+    case "support_reply":
+      return `respondeu seu pedido: ${n.bookTitle ?? "suporte"}.`;
   }
 }
 

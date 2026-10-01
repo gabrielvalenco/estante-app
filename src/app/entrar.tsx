@@ -134,6 +134,10 @@ export default function SignIn() {
         </Button>
 
         <Text variant="small" tone="ink4" style={{ textAlign: "center", marginTop: 8 }}>
+          <Text variant="small" tone="anil" onPress={() => router.push("/ajuda")}>
+            Precisa de ajuda?
+          </Text>
+          {"  ·  "}
           <Text variant="small" tone="anil" onPress={() => void Linking.openURL(`${SITE_URL}/privacidade`)}>
             Privacidade
           </Text>
