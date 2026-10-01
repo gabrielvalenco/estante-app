@@ -49,7 +49,8 @@ export default function SignIn() {
       if (await signInWithSite()) leave();
     } catch (err) {
       setOutdated(err instanceof ApiError && err.code === "outdated_app");
-      setError(errorMessage(err));
+      // Fora da API (navegador, link de volta), mostra o detalhe: ajuda a entender o problema no aparelho.
+      setError(err instanceof ApiError ? errorMessage(err) : `Não deu para entrar pelo site. ${err instanceof Error ? err.message : ""}`.trim());
     } finally {
       setViaSite(false);
     }

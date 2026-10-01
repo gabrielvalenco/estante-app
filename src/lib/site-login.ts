@@ -29,7 +29,9 @@ export async function connectWithSite(): Promise<{ code: string; verifier: strin
   const redirect = Linking.createURL(CONNECT_PATH);
 
   const url = `${SITE_URL}/app/conectar?${new URLSearchParams({ challenge, redirect })}`;
-  const result = await WebBrowser.openAuthSessionAsync(url, redirect);
+  // No Android, abre a aba do navegador na mesma tarefa do app (sem a atividade intermediária, que em
+  // vários aparelhos tirava o app da frente). Na volta pelo estante://, o app vem para a frente e a aba fecha.
+  const result = await WebBrowser.openAuthSessionAsync(url, redirect, { createTask: false, showInRecents: false });
   if (result.type !== "success") return null;
 
   const { queryParams } = Linking.parse(result.url);
