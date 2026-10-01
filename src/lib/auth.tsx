@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { Platform } from "react-native";
 
 import { api, configureApi } from "@/lib/api";
+import { connectWithSite } from "@/lib/site-login";
 import type { Account } from "@/lib/types";
 
 /**
@@ -24,6 +25,8 @@ type AuthValue = {
   account: Account | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
+  /** Entrar pelo site (Google, GitHub ou senha). false se a pessoa cancelou. */
+  signInWithSite: () => Promise<boolean>;
   signOut: () => Promise<void>;
   /** Atualiza a conta em cache (depois de editar perfil, foto, estante). */
   setAccount: (next: Account | ((prev: Account) => Account)) => void;
@@ -72,6 +75,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         start(await api<{ token: string; account: Account }>("/auth/login", { method: "POST", body: { email, password }, auth: false })),
       signUp: async (name, email, password) =>
         start(await api<{ token: string; account: Account }>("/auth/signup", { method: "POST", body: { name, email, password }, auth: false })),
+      signInWithSite: async () => {
+        const got = await connectWithSite();
+        if (!got) return false;
+        await start(await api<{ token: string; account: Account }>("/auth/exchange", { method: "POST", body: got, auth: false }));
+        return true;
+      },
       signOut,
       setAccount: (next) =>
         queryClient.setQueryData<Account>(["me", token], (prev) => (prev ? (typeof next === "function" ? next(prev) : next) : prev)),

@@ -8,10 +8,11 @@ import { SITE_URL, errorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { font, useColors } from "@/lib/theme";
 
-/** Entrar ou criar conta com e-mail e senha. A mesma conta vale no site. */
+/** Entrar pelo site (Google, GitHub ou senha) ou com e-mail e senha aqui mesmo. A mesma conta vale no site. */
 export default function SignIn() {
   const c = useColors();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithSite } = useAuth();
+  const [viaSite, setViaSite] = useState(false);
   const [mode, setMode] = useState<"entrar" | "criar">("entrar");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -28,11 +29,26 @@ export default function SignIn() {
     try {
       if (mode === "entrar") await signIn(email.trim(), password);
       else await signUp(name.trim(), email.trim(), password);
-      router.back();
+      leave();
     } catch (err) {
       setError(errorMessage(err));
     } finally {
       setBusy(false);
+    }
+  }
+
+  // Volta para onde a pessoa estava; aberta direto (link ou web), vai para o início.
+  const leave = () => (router.canGoBack() ? router.back() : router.replace("/"));
+
+  async function enterWithSite() {
+    setError(null);
+    setViaSite(true);
+    try {
+      if (await signInWithSite()) leave();
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setViaSite(false);
     }
   }
 
@@ -57,6 +73,21 @@ export default function SignIn() {
           <Text tone="ink3" style={{ textAlign: "center" }}>
             A mesma conta do site: sua estante aparece nos dois.
           </Text>
+        </View>
+
+        <Button onPress={enterWithSite} loading={viaSite} disabled={busy}>
+          Continuar com Google, GitHub ou o site
+        </Button>
+        <Text variant="caption" tone="ink4" style={{ textAlign: "center", marginTop: -6 }}>
+          Abre o site da Estante para você entrar e volta para o app.
+        </Text>
+
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginVertical: 4 }}>
+          <View style={{ flex: 1, height: 1, backgroundColor: c.line }} />
+          <Text variant="caption" tone="ink4">
+            OU COM E-MAIL E SENHA
+          </Text>
+          <View style={{ flex: 1, height: 1, backgroundColor: c.line }} />
         </View>
 
         <View style={{ flexDirection: "row", gap: 8, justifyContent: "center" }}>
@@ -98,12 +129,11 @@ export default function SignIn() {
           </Text>
         ) : null}
 
-        <Button onPress={submit} loading={busy}>
+        <Button variant="secondary" onPress={submit} loading={busy} disabled={viaSite}>
           {mode === "entrar" ? "Entrar" : "Criar conta"}
         </Button>
 
         <Text variant="small" tone="ink4" style={{ textAlign: "center", marginTop: 8 }}>
-          Entra com Google ou GitHub no site? Por enquanto, o app usa e-mail e senha.{" "}
           <Text variant="small" tone="anil" onPress={() => void Linking.openURL(`${SITE_URL}/privacidade`)}>
             Privacidade
           </Text>

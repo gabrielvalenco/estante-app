@@ -53,7 +53,8 @@
           "cameraPermission": "A Estante usa a câmera só quando você fotografa uma página para guardar a citação.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

@@ -2,6 +2,7 @@ import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, us
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as WebBrowser from "expo-web-browser";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
@@ -10,6 +11,8 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { font, useColors } from "@/lib/theme";
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
+// Na versão web, fecha a janela do "entrar pelo site" e entrega o código a quem a abriu.
+WebBrowser.maybeCompleteAuthSession();
 
 export default function RootLayout() {
   const [queryClient] = useState(
@@ -66,6 +69,7 @@ function Navigation({ ready }: { ready: boolean }) {
         <Stack.Screen name="discussao/[id]" options={{ title: "Discussão" }} />
         <Stack.Screen name="planos" options={{ title: "Planos" }} />
         <Stack.Screen name="retrospectiva" options={{ title: "Retrospectiva" }} />
+        <Stack.Screen name="conectado" options={{ title: "" }} />
         <Stack.Screen name="clubes/index" options={{ title: "Clubes" }} />
         <Stack.Screen name="clubes/[id]" options={{ title: "Clube" }} />
         <Stack.Screen name="clubes/convite/[code]" options={{ title: "Convite" }} />
