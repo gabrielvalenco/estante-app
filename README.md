@@ -5,6 +5,11 @@ só que para livros. Feito com **Expo** (React Native) e usando a mesma conta e 
 
 ![Telas do app](docs/telas.png)
 
+## Baixar
+
+**[Baixar o APK para Android](https://expo.dev/artifacts/eas/c-Cuy18o4X0b6VLHniinCyshA-H1S4_0d3jo1B3Tffk.apk)** (versão de 1º de outubro de 2026).
+Abra o link no celular e, se o Android pedir, permita instalar apps desta fonte.
+
 ## O que dá para fazer
 
 - Criar conta ou entrar com e-mail e senha (a mesma conta do site)
@@ -14,6 +19,10 @@ só que para livros. Feito com **Expo** (React Native) e usando a mesma conta e 
 - Estante com filtros e a meta de leitura do ano
 - Perfis com diário, favoritos e reviews; perfil privado com pedido para seguir
 - Feed de quem você segue e notificações (com aceitar/recusar pedidos)
+- Marcador de página, citações e notas por livro, com citação por foto da página
+- Discussões sem spoiler: cada um vê só até a página que leu
+- Clubes de leitura privados: progresso do grupo e discussões só para os membros
+- Retrospectiva do ano e planos (Brochura, Capa Dura e Ex Libris; a assinatura é feita no site)
 - Foto de perfil (recorte quadrado, reduzida para 256px antes de enviar)
 - Modo escuro automático
 
