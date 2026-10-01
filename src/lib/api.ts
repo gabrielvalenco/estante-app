@@ -61,7 +61,7 @@ export function errorMessage(err: unknown): string {
     too_big: "Imagem grande demais.",
     blocked: "Não é possível interagir com esse perfil.",
     unauthenticated: "Entre na sua conta para continuar.",
-    outdated_app: "Para entrar pelo site, atualize o app: baixe o APK novo em estante-pink.vercel.app.",
+    outdated_app: "Para entrar pelo site, instale a versão nova do app.",
   };
   return messages[code] ?? "Algo deu errado. Tente de novo em instantes.";
 }

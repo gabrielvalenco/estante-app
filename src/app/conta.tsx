@@ -1,7 +1,7 @@
 import { SaveFormat, ImageManipulator } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { Camera, Check, ChevronRight, LifeBuoy } from "lucide-react-native";
+import { Camera, Check, ChevronRight, Download, LifeBuoy } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Switch, TextInput, View } from "react-native";
 
@@ -9,6 +9,7 @@ import { Button, Text } from "@/components/ui";
 import { Avatar } from "@/components/user";
 import { SITE_URL, api, errorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { appVersion, compareVersions, DOWNLOAD_URL, useLatestRelease } from "@/lib/release";
 import { confirmAction } from "@/lib/confirm";
 import { font, toneColors, useColors } from "@/lib/theme";
 import type { Account, Profile } from "@/lib/types";
@@ -202,6 +203,7 @@ function Form({ profile }: { profile: Profile }) {
           </View>
           <ChevronRight size={18} color={c.ink4} />
         </Pressable>
+        <VersionRow />
 
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 16, backgroundColor: c.surface, borderWidth: 1, borderColor: c.line }}>
           <View style={{ flex: 1, gap: 2 }}>
@@ -252,6 +254,40 @@ function Field({ label, children, style }: { label: string; children: React.Reac
       </Text>
       {children}
     </View>
+  );
+}
+
+/** Versão instalada e o download da mais nova (APK no GitHub). */
+function VersionRow() {
+  const c = useColors();
+  const latest = useLatestRelease();
+  const newer = latest.data && compareVersions(latest.data, appVersion) > 0 ? latest.data : null;
+  return (
+    <Pressable
+      onPress={() => void Linking.openURL(DOWNLOAD_URL)}
+      accessibilityRole="link"
+      accessibilityHint="Baixa o APK no navegador"
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        padding: 16,
+        borderRadius: 16,
+        backgroundColor: newer ? c.musgoSoft : c.surface,
+        borderWidth: newer ? 0 : 1,
+        borderColor: c.line,
+        opacity: pressed ? 0.8 : 1,
+      })}
+    >
+      <Download size={20} color={newer ? c.musgo : c.ink3} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text variant="label">{newer ? `Versão ${newer} disponível` : `Versão ${appVersion}`}</Text>
+        <Text variant="small" tone="ink3">
+          {newer ? `Você está na ${appVersion}. Toque para baixar a nova.` : "Baixar a versão mais nova do app"}
+        </Text>
+      </View>
+      <ChevronRight size={18} color={c.ink4} />
+    </Pressable>
   );
 }
 

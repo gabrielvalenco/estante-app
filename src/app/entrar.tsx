@@ -4,8 +4,9 @@ import { KeyboardAvoidingView, Linking, Platform, ScrollView, TextInput, View } 
 
 import { Mark } from "@/components/brand";
 import { Button, Chip, Text } from "@/components/ui";
-import { SITE_URL, errorMessage } from "@/lib/api";
+import { ApiError, SITE_URL, errorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { DOWNLOAD_URL } from "@/lib/release";
 import { font, useColors } from "@/lib/theme";
 
 /** Entrar pelo site (Google, GitHub ou senha) ou com e-mail e senha aqui mesmo. A mesma conta vale no site. */
@@ -13,6 +14,7 @@ export default function SignIn() {
   const c = useColors();
   const { signIn, signUp, signInWithSite } = useAuth();
   const [viaSite, setViaSite] = useState(false);
+  const [outdated, setOutdated] = useState(false);
   const [mode, setMode] = useState<"entrar" | "criar">("entrar");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -46,6 +48,7 @@ export default function SignIn() {
     try {
       if (await signInWithSite()) leave();
     } catch (err) {
+      setOutdated(err instanceof ApiError && err.code === "outdated_app");
       setError(errorMessage(err));
     } finally {
       setViaSite(false);
@@ -127,6 +130,12 @@ export default function SignIn() {
           <Text tone="danger" variant="small">
             {error}
           </Text>
+        ) : null}
+
+        {outdated ? (
+          <Button variant="secondary" onPress={() => void Linking.openURL(DOWNLOAD_URL)}>
+            Baixar a versão nova
+          </Button>
         ) : null}
 
         <Button variant="secondary" onPress={submit} loading={busy} disabled={viaSite}>
