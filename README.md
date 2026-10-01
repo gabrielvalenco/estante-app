@@ -7,7 +7,7 @@ só que para livros. Feito com **Expo** (React Native) e usando a mesma conta e 
 
 ## Baixar
 
-**[Baixar o APK para Android](https://expo.dev/artifacts/eas/XKQ4ToAH9k81mnJvjgs0OmjjPRd56dTsuDQGWNiRWTs.apk)** (versão de 1º de outubro de 2026).
+**[Baixar o APK para Android](https://github.com/gabrielvalenco/estante-app/releases/latest/download/estante.apk)** (sempre a versão mais nova; histórico em [Releases](https://github.com/gabrielvalenco/estante-app/releases)).
 Abra o link no celular e, se o Android pedir, permita instalar apps desta fonte.
 
 ## O que dá para fazer
@@ -54,4 +54,14 @@ EXPO_PUBLIC_API_URL=http://<ip-do-computador>:3100 npx expo start
 npx eas-cli@latest build --platform android --profile preview
 ```
 
-O EAS devolve um link público para baixar e instalar o APK.
+O perfil `preview` gera um APK de teste (canal OTA `preview`). Para publicar uma versão, suba `version` no `app.json`, rode o perfil `production` e anexe o APK a um Release do GitHub com o nome `estante.apk`: o link de download do site e do app sempre aponta para o Release mais novo.
+
+```bash
+npx eas-cli@latest build --platform android --profile production
+```
+
+Atualizações só de JavaScript vão por OTA, para os dois canais:
+
+```bash
+npx eas-cli update --channel production --environment production --message "..."
+```
