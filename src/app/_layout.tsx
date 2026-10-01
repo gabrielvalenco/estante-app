@@ -2,17 +2,17 @@ import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, us
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import * as WebBrowser from "expo-web-browser";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { useColorScheme } from "react-native";
+import { useColorScheme, Platform } from "react-native";
 
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { font, useColors } from "@/lib/theme";
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 // Na versão web, fecha a janela do "entrar pelo site" e entrega o código a quem a abriu.
-WebBrowser.maybeCompleteAuthSession();
+// Carregado sob demanda: no celular não é preciso (e APKs antigos não têm o módulo nativo).
+if (Platform.OS === "web") void import("expo-web-browser").then((w) => w.maybeCompleteAuthSession());
 
 export default function RootLayout() {
   const [queryClient] = useState(
