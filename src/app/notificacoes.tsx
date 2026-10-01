@@ -37,6 +37,8 @@ export default function Notifications() {
           onPress={() =>
             item.type === "support_reply"
               ? router.push(`/ajuda/${item.bookId?.split(":")[1] ?? ""}`)
+              : item.type === "club_invite"
+                ? router.push(`/clubes/${item.bookId?.split(":")[1] ?? ""}`)
               : router.push(item.bookId && item.type !== "follow" ? `/livro/${item.bookId}` : `/u/${item.actor.handle}`)
           }
           style={({ pressed }) => ({ flexDirection: "row", gap: 12, paddingVertical: 14, borderBottomWidth: 1, borderColor: c.line, opacity: pressed ? 0.7 : 1 })}
@@ -78,6 +80,8 @@ function message(n: NotificationItem) {
       return `terminou de ler ${n.bookTitle ?? "um livro"}.`;
     case "discussion_reply":
       return `respondeu sua discussão sobre ${n.bookTitle ?? "um livro"}.`;
+    case "club_invite":
+      return `convidou você para o clube ${n.bookTitle ?? ""}.`;
     case "support_reply":
       return `respondeu seu pedido: ${n.bookTitle ?? "suporte"}.`;
   }

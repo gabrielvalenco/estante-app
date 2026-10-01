@@ -112,7 +112,7 @@ export type FeedItem = ShelfEntry & { user: UserRef };
 
 export type NotificationItem = {
   id: string;
-  type: "follow" | "follow_request" | "follow_accepted" | "review_like" | "friend_finished" | "discussion_reply" | "support_reply";
+  type: "follow" | "follow_request" | "follow_accepted" | "review_like" | "friend_finished" | "discussion_reply" | "support_reply" | "club_invite";
   actor: ProfileCard;
   bookId: string | null;
   bookTitle: string | null;
@@ -177,5 +177,8 @@ export type ThreadUsage = { planName: string; threadsThisMonth: number; threadsP
 export type ClubBook = { id: string; title: string; author: string; coverId: number | null; color: string };
 export type ClubSummary = { id: string; name: string; description: string; book: ClubBook | null; members: number; role: "owner" | "member" };
 export type ClubMember = UserRef & { role: "owner" | "member"; page: number | null; totalPages: number | null; finished: boolean };
-export type Club = ClubSummary & { inviteCode: string | null; memberList: ClubMember[]; maxMembers: number };
+export type InvitedPerson = UserRef;
+export type Club = ClubSummary & { inviteCode: string | null; memberList: ClubMember[]; maxMembers: number; pendingInvites: InvitedPerson[] | null };
+export type InvitableFollower = UserRef & { invited: boolean };
+export type ClubInvitation = { id: string; name: string; description: string; book: ClubBook | null; members: number; invitedBy: string };
 export type ClubInvite = { id: string; name: string; description: string; book: ClubBook | null; members: number; ownerName: string; alreadyMember: boolean };

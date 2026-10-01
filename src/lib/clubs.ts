@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ApiError, api } from "@/lib/api";
-import type { Club, ClubInvite, ClubSummary } from "@/lib/types";
+import type { Club, ClubInvitation, ClubInvite, ClubSummary, InvitableFollower } from "@/lib/types";
 
 /** Clubes de leitura. Criar e administrar fica no site; no app a pessoa entra, acompanha e conversa. */
 
@@ -44,6 +44,58 @@ export function useLeaveClub(id: string) {
       void qc.invalidateQueries({ queryKey: ["clubs"] });
     },
   });
+}
+
+/** Seguidores que quem criou pode convidar; filtra por nome ou @ (consulta a cada letra, com cache curto). */
+export function useInvitable(clubId: string, query: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["club-invitable", clubId, query],
+    enabled,
+    queryFn: () => api<{ people: InvitableFollower[] }>(`/clubs/${clubId}/invitable?q=${encodeURIComponent(query)}`),
+    placeholderData: (prev) => prev,
+    staleTime: 10_000,
+  });
+}
+
+export function useInviteActions(clubId: string) {
+  const qc = useQueryClient();
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["club", clubId] });
+    void qc.invalidateQueries({ queryKey: ["club-invitable", clubId] });
+  };
+  return {
+    invite: useMutation({ mutationFn: (handle: string) => api(`/clubs/${clubId}/invitations`, { method: "POST", body: { handle } }), onSuccess: refresh }),
+    cancel: useMutation({ mutationFn: (handle: string) => api(`/clubs/${clubId}/invitations/${handle}`, { method: "DELETE" }), onSuccess: refresh }),
+  };
+}
+
+/** Convite direto recebido para o clube (para quem ainda não é membro). */
+export function useInvitation(clubId: string, enabled: boolean) {
+  return useQuery({ queryKey: ["club-invitation", clubId], enabled, retry: false, queryFn: () => api<ClubInvitation>(`/clubs/${clubId}/invitation`) });
+}
+
+export function useRespondInvitation(clubId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (accept: boolean) => api(`/clubs/${clubId}/invitation`, { method: "POST", body: { accept } }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["club", clubId] });
+      void qc.invalidateQueries({ queryKey: ["club-invitation", clubId] });
+      void qc.invalidateQueries({ queryKey: ["clubs"] });
+      void qc.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+export function inviteError(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.code === "not_follower") return "Só dá para convidar quem segue você.";
+    if (err.code === "already_member") return "Essa pessoa já está no clube.";
+    if (err.code === "full") return "O clube está cheio.";
+    if (err.code === "limit_invites") return "Muitos convites sem resposta. Espere algumas pessoas responderem.";
+    if (err.code === "blocked") return "Não é possível convidar essa pessoa.";
+  }
+  return "Não foi possível convidar. Tente de novo.";
 }
 
 export function clubError(err: unknown): string {
