@@ -7,12 +7,12 @@ só que para livros. Feito com **Expo** (React Native) e usando a mesma conta e 
 
 ## Baixar
 
-**[Baixar o APK para Android](https://expo.dev/artifacts/eas/c-Cuy18o4X0b6VLHniinCyshA-H1S4_0d3jo1B3Tffk.apk)** (versão de 1º de outubro de 2026).
+**[Baixar o APK para Android](https://expo.dev/artifacts/eas/XKQ4ToAH9k81mnJvjgs0OmjjPRd56dTsuDQGWNiRWTs.apk)** (versão de 1º de outubro de 2026).
 Abra o link no celular e, se o Android pedir, permita instalar apps desta fonte.
 
 ## O que dá para fazer
 
-- Criar conta ou entrar com e-mail e senha (a mesma conta do site)
+- Entrar com Google, GitHub ou e-mail e senha (a mesma conta do site)
 - Buscar livros (Open Library) e leitores
 - Marcar livros como quero ler, lendo ou lido com um toque
 - Registrar a leitura: nota de meia em meia estrela, curtida, data em que terminou e review
