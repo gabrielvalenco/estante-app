@@ -10,7 +10,12 @@ import { SITE_URL, api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useColors } from "@/lib/theme";
 
-const PRICE = { month: { value: "R$ 6,90", per: "/mês" }, year: { value: "R$ 59", per: "/ano" } };
+type Paid = "capa-dura" | "ex-libris";
+const PRICES: Record<Paid, { month: { value: string; per: string }; year: { value: string; per: string }; perMonth: string }> = {
+  "capa-dura": { month: { value: "R$ 6,90", per: "/mês" }, year: { value: "R$ 59", per: "/ano" }, perMonth: "R$ 4,92" },
+  "ex-libris": { month: { value: "R$ 14,90", per: "/mês" }, year: { value: "R$ 119", per: "/ano" }, perMonth: "R$ 9,92" },
+};
+const NAMES: Record<Paid, string> = { "capa-dura": "Capa Dura", "ex-libris": "Ex Libris" };
 
 const BROCHURA = [
   "Reviews, notas e estante sem limite",
@@ -23,7 +28,7 @@ const BROCHURA = [
 ];
 const CAPA_DURA = ["Tudo do Brochura", "Citações ilimitadas", "Notas ilimitadas em cada livro", "Discussões novas sem limite", "Importar destaques do Kindle", "Exportar citações e notas (Markdown)", "Retrospectiva do ano completa", "Citação por foto da página (10 por mês)"];
 const CAPA_DURA_SOON: string[] = [];
-const EX_LIBRIS = ["Tudo do Capa Dura", "Clubes de leitura privados", "Citação por foto da página, sem limite", "Temas e selo Ex Libris"];
+const EX_LIBRIS = ["Tudo do Capa Dura", "Clubes de leitura privados: até 5, com 30 pessoas cada", "Quem você convida participa de graça", "Citação por foto da página, sem limite"];
 
 /**
  * Planos no app. A assinatura em si acontece no site (checkout do Stripe no navegador):
@@ -39,18 +44,46 @@ export default function Plans() {
   const paid = Boolean(plan && plan.plan !== "brochura");
   const end = plan?.periodEnd ? new Date(plan.periodEnd).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" }) : null;
   const openSite = () => void Linking.openURL(`${SITE_URL}/planos`);
+  const current = paid && plan ? (plan.plan as Paid) : null;
+
+  /** Botão de cada plano pago: gerenciar, trocar, entrar ou assinar (tudo no site). */
+  function Cta({ target }: { target: Paid }) {
+    const price = PRICES[target][period];
+    return (
+      <View style={{ marginTop: 16 }}>
+        {current === target ? (
+          <Button onPress={openSite}>Gerenciar no site</Button>
+        ) : current ? (
+          <Button variant="secondary" onPress={openSite}>{`Mudar para ${NAMES[target]} no site`}</Button>
+        ) : status !== "user" ? (
+          <Button variant={target === "capa-dura" ? "primary" : "secondary"} onPress={() => router.push("/entrar")}>
+            Entrar para assinar
+          </Button>
+        ) : info.data?.enabled ? (
+          <Button variant={target === "capa-dura" ? "primary" : "secondary"} onPress={openSite}>{`Assinar por ${price.value}${price.per}`}</Button>
+        ) : (
+          <Button disabled>Em breve</Button>
+        )}
+        {!current && status === "user" && info.data?.enabled ? (
+          <Text variant="caption" tone="ink4" style={{ textAlign: "center", marginTop: 8 }}>
+            O pagamento abre no navegador, pelo Stripe.
+          </Text>
+        ) : null}
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: insets.bottom + 32 }}>
       <View style={{ gap: 6 }}>
         <Text variant="hero">Leia mais, guarde tudo.</Text>
-        <Text tone="ink2">A Estante é grátis para registrar, avaliar e seguir leitores. O Capa Dura tira os limites das suas anotações e discussões.</Text>
+        <Text tone="ink2">A Estante é grátis para registrar, avaliar e seguir leitores. O Capa Dura tira os limites; o Ex Libris abre clubes de leitura privados.</Text>
       </View>
 
       {paid && plan ? (
         <View style={{ backgroundColor: c.musgoSoft, borderRadius: 16, padding: 16, gap: 4 }}>
           <Text weight="semibold" style={{ color: c.musgo }}>
-            Você assina o Capa Dura {plan.interval === "year" ? "anual" : "mensal"}
+            Você assina o {NAMES[plan.plan as Paid]} {plan.interval === "year" ? "anual" : "mensal"}
           </Text>
           <Text variant="small" tone="ink2">
             {plan.canceling ? `Cancelado: vale até ${end} e não renova.` : plan.status === "past_due" ? "A última cobrança falhou. Atualize o cartão no site." : end ? `Renova em ${end}.` : "Assinatura ativa."}
@@ -91,11 +124,11 @@ export default function Plans() {
           Para quem anota tudo e puxa conversa.
         </Text>
         <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4, marginTop: 12 }}>
-          <Text variant="hero">{PRICE[period].value}</Text>
-          <Text tone="ink3">{PRICE[period].per}</Text>
+          <Text variant="hero">{PRICES["capa-dura"][period].value}</Text>
+          <Text tone="ink3">{PRICES["capa-dura"][period].per}</Text>
         </View>
         <Text variant="caption" tone="ink4">
-          {period === "year" ? "Equivale a R$ 4,92 por mês." : "Ou R$ 59 no plano anual."}
+          {period === "year" ? `Equivale a ${PRICES["capa-dura"].perMonth} por mês.` : `Ou ${PRICES["capa-dura"].year.value} no plano anual.`}
         </Text>
         <Features items={CAPA_DURA} />
         {CAPA_DURA_SOON.length ? (
@@ -106,22 +139,26 @@ export default function Plans() {
             <Features items={CAPA_DURA_SOON} soft />
           </>
         ) : null}
-        <View style={{ marginTop: 16 }}>
-          {paid ? (
-            <Button onPress={openSite}>Gerenciar no site</Button>
-          ) : status !== "user" ? (
-            <Button onPress={() => router.push("/entrar")}>Entrar para assinar</Button>
-          ) : info.data?.enabled ? (
-            <Button onPress={openSite}>{`Assinar por ${PRICE[period].value}${PRICE[period].per}`}</Button>
-          ) : (
-            <Button disabled>Em breve</Button>
-          )}
-          {!paid && status === "user" && info.data?.enabled ? (
-            <Text variant="caption" tone="ink4" style={{ textAlign: "center", marginTop: 8 }}>
-              O pagamento abre no navegador, pelo Stripe.
-            </Text>
-          ) : null}
+        <Cta target="capa-dura" />
+      </View>
+
+      <View style={{ backgroundColor: c.surface, borderRadius: 24, borderWidth: 1, borderColor: c.line, padding: 20, gap: 4 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Text variant="section">Ex Libris</Text>
+          <Sparkles size={16} color={c.ambar} />
         </View>
+        <Text variant="small" tone="ink3">
+          Para clubes e leitores de carteirinha.
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4, marginTop: 12 }}>
+          <Text variant="hero">{PRICES["ex-libris"][period].value}</Text>
+          <Text tone="ink3">{PRICES["ex-libris"][period].per}</Text>
+        </View>
+        <Text variant="caption" tone="ink4">
+          {period === "year" ? `Equivale a ${PRICES["ex-libris"].perMonth} por mês.` : `Ou ${PRICES["ex-libris"].year.value} no plano anual.`}
+        </Text>
+        <Features items={EX_LIBRIS} />
+        <Cta target="ex-libris" />
       </View>
 
       <View style={{ backgroundColor: c.surface, borderRadius: 24, borderWidth: 1, borderColor: c.line, padding: 20, gap: 4 }}>
@@ -138,20 +175,6 @@ export default function Plans() {
             {paid ? "Incluído no seu plano." : "Seu plano atual."}
           </Text>
         ) : null}
-      </View>
-
-      <View style={{ borderRadius: 24, borderWidth: 1, borderStyle: "dashed", borderColor: c.lineStrong, padding: 20, gap: 4 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Text variant="section">Ex Libris</Text>
-          <Sparkles size={16} color={c.ambar} />
-        </View>
-        <Text variant="small" tone="ink3">
-          Para clubes e leitores de carteirinha.
-        </Text>
-        <Text variant="hero" tone="ink3" style={{ marginTop: 12 }}>
-          Em breve
-        </Text>
-        <Features items={EX_LIBRIS} soft />
       </View>
 
       <View style={{ gap: 8 }}>

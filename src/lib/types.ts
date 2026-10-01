@@ -172,3 +172,10 @@ export type Post = { id: string; page: number; spoiler: boolean; body: string | 
 export type Viewer = { loggedIn: boolean; page: number | null; finished: boolean; revealed: boolean; bookmark: number };
 
 export type ThreadUsage = { planName: string; threadsThisMonth: number; threadsPerMonthLimit: number | null };
+
+/** Clubes de leitura (Ex Libris cria; qualquer conta entra pelo convite). */
+export type ClubBook = { id: string; title: string; author: string; coverId: number | null; color: string };
+export type ClubSummary = { id: string; name: string; description: string; book: ClubBook | null; members: number; role: "owner" | "member" };
+export type ClubMember = UserRef & { role: "owner" | "member"; page: number | null; totalPages: number | null; finished: boolean };
+export type Club = ClubSummary & { inviteCode: string | null; memberList: ClubMember[]; maxMembers: number };
+export type ClubInvite = { id: string; name: string; description: string; book: ClubBook | null; members: number; ownerName: string; alreadyMember: boolean };

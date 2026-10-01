@@ -256,7 +256,7 @@ function PlanRow() {
       style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 16, backgroundColor: paid ? c.musgoSoft : c.anilSoft, opacity: pressed ? 0.8 : 1 })}
     >
       <View style={{ flex: 1, gap: 2 }}>
-        <Text variant="label">{paid ? "Capa Dura" : "Plano Brochura (grátis)"}</Text>
+        <Text variant="label">{paid ? (plan.plan === "ex-libris" ? "Ex Libris" : "Capa Dura") : "Plano Brochura (grátis)"}</Text>
         <Text variant="small" tone="ink3">
           {paid ? (plan.canceling ? `Cancelado: vale até ${end}.` : end ? `Renova em ${end}.` : "Assinatura ativa.") : "Citações, notas e discussões sem limite no Capa Dura."}
         </Text>

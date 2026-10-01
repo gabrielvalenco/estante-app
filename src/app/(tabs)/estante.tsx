@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { ChartColumnBig, NotebookPen } from "lucide-react-native";
+import { ChartColumnBig, NotebookPen, Users } from "lucide-react-native";
 import { useState } from "react";
 import { FlatList, Pressable, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -60,6 +60,15 @@ export default function ShelfScreen() {
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
               <Text variant="title">Minha estante</Text>
               <View style={{ flexDirection: "row", gap: 8 }}>
+                <Pressable
+                  onPress={() => router.push("/clubes")}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clubes"
+                  hitSlop={8}
+                  style={{ width: 36, height: 36, alignItems: "center", justifyContent: "center", borderRadius: 999, backgroundColor: c.sunken }}
+                >
+                  <Users size={16} color={c.ambarInk} />
+                </Pressable>
                 <Pressable
                   onPress={() => router.push("/retrospectiva")}
                   accessibilityRole="button"

@@ -50,20 +50,20 @@ export function PageBadge({ page }: { page: number }) {
   );
 }
 
-/** Discussões na tela do livro. */
-export function DiscussionsSection({ book }: { book: { id: string; title: string } }) {
+/** Discussões na tela do livro, ou as privadas de um clube (clubId). */
+export function DiscussionsSection({ book, clubId }: { book: { id: string; title: string }; clubId?: string }) {
   const c = useColors();
   const { status } = useAuth();
   const [reveal, setReveal] = useState(false);
   const [creating, setCreating] = useState(false);
-  const q = useThreads(book.id, reveal);
+  const q = useThreads(book.id, reveal, clubId);
 
   return (
     <View style={{ gap: 12 }}>
       <View style={{ flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" }}>
         <View>
           <Text variant="caption" tone="ink4">
-            SEM SPOILER: CADA UM VÊ ATÉ ONDE LEU
+            {clubId ? "SÓ PARA O CLUBE, SEM SPOILER" : "SEM SPOILER: CADA UM VÊ ATÉ ONDE LEU"}
           </Text>
           <Text variant="section">Discussões</Text>
         </View>
@@ -139,7 +139,7 @@ export function DiscussionsSection({ book }: { book: { id: string; title: string
       ) : null}
 
       {creating && q.data ? (
-        <NewThreadSheet book={book} defaultPage={q.data.viewer.bookmark} usage={q.data.usage} onClose={() => setCreating(false)} />
+        <NewThreadSheet book={book} clubId={clubId} defaultPage={q.data.viewer.bookmark} usage={q.data.usage} onClose={() => setCreating(false)} />
       ) : null}
     </View>
   );
@@ -187,11 +187,13 @@ export function PageField({ page, setPage }: { page: string; setPage: (v: string
 
 function NewThreadSheet({
   book,
+  clubId,
   defaultPage,
   usage,
   onClose,
 }: {
   book: { id: string; title: string };
+  clubId?: string;
   defaultPage: number;
   usage: { planName: string; threadsThisMonth: number; threadsPerMonthLimit: number | null } | null;
   onClose: () => void;
@@ -210,7 +212,7 @@ function NewThreadSheet({
     if (!body.trim()) return setError("Escreva o que você quer discutir.");
     setError(null);
     create.mutate(
-      { bookTitle: book.title, title: title.trim(), body: body.trim(), page: Number(page) || 0 },
+      { bookTitle: book.title, title: title.trim(), body: body.trim(), page: Number(page) || 0, clubId },
       {
         onSuccess: () => {
           void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
@@ -259,8 +261,8 @@ function NewThreadSheet({
             </Text>
           ) : null}
           <Text variant="caption" tone="ink4">
-            Discussões são públicas, mesmo com o perfil privado.
-            {usage?.threadsPerMonthLimit != null ? ` ${usage.threadsThisMonth} de ${usage.threadsPerMonthLimit} discussões novas neste mês no plano ${usage.planName}.` : ""}
+            {clubId ? "Só os membros do clube veem esta discussão." : "Discussões são públicas, mesmo com o perfil privado."}
+            {!clubId && usage?.threadsPerMonthLimit != null ? ` ${usage.threadsThisMonth} de ${usage.threadsPerMonthLimit} discussões novas neste mês no plano ${usage.planName}.` : ""}
           </Text>
           {upsell ? (
             <Button

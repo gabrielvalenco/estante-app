@@ -8,24 +8,26 @@ import type { Post, Thread, ThreadUsage, Viewer } from "@/lib/types";
  * aqui só se decide pedir tudo (reveal) quando a pessoa escolhe ver os spoilers.
  */
 
-export function useThreads(bookId: string, reveal: boolean) {
+/** Com clubId, só as discussões do clube (privadas); sem, só as públicas. */
+export function useThreads(bookId: string, reveal: boolean, clubId?: string) {
+  const qs = [reveal ? "spoilers=1" : "", clubId ? `club=${clubId}` : ""].filter(Boolean).join("&");
   return useQuery({
-    queryKey: ["threads", bookId, reveal],
-    queryFn: () => api<{ threads: Thread[]; viewer: Viewer; usage: ThreadUsage | null }>(`/books/${bookId}/discussions${reveal ? "?spoilers=1" : ""}`),
+    queryKey: ["threads", bookId, reveal, clubId ?? null],
+    queryFn: () => api<{ threads: Thread[]; viewer: Viewer; usage: ThreadUsage | null }>(`/books/${bookId}/discussions${qs ? `?${qs}` : ""}`),
   });
 }
 
 export function useThread(id: string, reveal: boolean) {
   return useQuery({
     queryKey: ["thread", id, reveal],
-    queryFn: () => api<{ thread: Thread; posts: Post[]; viewer: Viewer; book: { id: string; title: string } }>(`/discussions/${id}${reveal ? "?spoilers=1" : ""}`),
+    queryFn: () => api<{ thread: Thread; posts: Post[]; viewer: Viewer; book: { id: string; title: string }; clubId: string | null }>(`/discussions/${id}${reveal ? "?spoilers=1" : ""}`),
   });
 }
 
 export function useCreateThread(bookId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (v: { bookTitle: string; title: string; body: string; page: number }) =>
+    mutationFn: (v: { bookTitle: string; title: string; body: string; page: number; clubId?: string }) =>
       api<{ thread: Thread; usage: ThreadUsage }>(`/books/${bookId}/discussions`, { method: "POST", body: v }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["threads", bookId] }),
   });
